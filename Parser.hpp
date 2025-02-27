@@ -1,14 +1,16 @@
 #include <vector>
 #include <map>
 #include <cctype>
+#include <stdexcept>
+#include <iostream>
 
 #ifndef INT8_MIN
 #include <cstdint>
 #endif
 
-using cstring=char*;
+using cstring=const char*;
 
-namespace cmd{
+namespace cmd {
 	enum Type {
 		boolean,
 		integer,
@@ -30,21 +32,18 @@ class Parser{
 		using argList_t = std::map<cstring, Type>;
 
 		Parser(void);
-		Parser(cstring, Type)		noexcept(true);
-		Parser(const arg_t&)		noexcept(true);
-		Parser(const argList_t&)	noexcept(true);
+		Parser(cstring, Type)		noexcept(false);
+		Parser(const arg_t&)		noexcept(false);
+		Parser(const argList_t&)	noexcept(false);
 		
 		~Parser() = default;
 
-		std::map<cstring, handeledType> parse(int, cstring[]) noexcept(true);
+		//std::map<cstring, handeledType> parse(int, cstring[]) noexcept(false);
+		static bool isCorrectName(cstring);
+		static bool isCorrectValue(cstring, Type=Type::string) noexcept(false);
 	
 	private:
 		argList_t knowArguments;
-
-		static bool isCorrectName(cstring);
-		static bool isCorrectValue(cstring, Type=Type::string);
-		
-		static cstring toCorrectName(cstring);
 	};
 }
 
@@ -57,4 +56,6 @@ namespace std {
 
 namespace util {
 	size_t strCount(cstring);
+
+	class notImplemented : std::logic_error{ public: notImplemented(const char[]); };
 }
