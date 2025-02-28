@@ -1,8 +1,5 @@
 #include "Parser.hpp"
 
-/** The theoreticaly maximum number of chars in a string (in reality, it's less) */
-#define STRING_MAX std::string().max_size()
-
 using namespace cmd;
 using namespace util;
 

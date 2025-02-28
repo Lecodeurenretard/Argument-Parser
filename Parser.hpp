@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <iostream>
 
+/** The theoreticaly maximum number of chars in a string (in reality, it's less) */
+#define STRING_MAX std::string().max_size()
+
 #ifndef INT8_MIN
 #include <cstdint>
 #endif

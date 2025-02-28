@@ -1,0 +1,51 @@
+#!/bin/bash
+# This file compiles libArgumentParser.so
+
+if [ -d build ]; then
+	echo "Already existing folder named \`build\` found."
+	echo -n "What do you want to do, r(ename existing folder), e(rase existing folder) or o(verwrite conflicting files)? "
+
+	read ans
+	while [[ $ans != 'r' && $ans != 'e' && $ans != 'o' ]]; do
+		echo -n "Answer only r, e or o: "
+		read ans
+	done
+
+	if [ $ans = 'r' ]; then
+		end=0
+		
+		if ! [ -d "_build" ]; then
+			mv build _build
+			echo "folder renamed to \`_build\`"
+		else
+			count=0
+			while [ -d "_build ($count)" ]; do
+				count=$((count+1))
+			done
+
+			mv build "_build ($count)"
+			echo "folder renamed to \`_build ($count)\`."
+		fi
+	elif [ $ans = 'e' ]; then
+		rm -rf build/* && echo "folder erased."
+	elif [ $ans = 'o' ]; then
+		true # do nothing
+	else
+		echo "You just found a bug!"
+		exit 1
+	fi
+else
+	mkdir build
+fi
+cd build
+
+cmake .. && cmake --build .
+if [ "$1" = "--install" ]; then
+	echo "Requiring root permission in order to copy libArgumentParser.so into /usr/lib and running ldconfig."
+	sudo cp libArgumentParser.so /usr/lib/libArgumentParser.so && sudo ldconfig /usr/lib/
+	
+	ldconfig -p | grep libArgumentParser\\.so > /dev/null
+	[ $? = 0 ] && echo "Success!."
+	[ $? = 1 ] && echo "An error occured."
+fi
+echo "done"

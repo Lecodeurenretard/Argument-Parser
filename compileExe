@@ -1,0 +1,7 @@
+#!/bin/bash
+# This file compiles a program using libArgumentParser.so, pass
+
+! [ -d build ] && mkdir build
+cd build
+
+g++ ../$1 libArgumentParser.so -o main -Wl,-rpath=.
