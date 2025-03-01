@@ -1,8 +1,5 @@
-#include <vector>
 #include <map>
-#include <cctype>
 #include <stdexcept>
-#include <iostream>
 
 /** The theoreticaly maximum number of chars in a string (in reality, it's less) */
 #define STRING_MAX std::string().max_size()
@@ -41,7 +38,7 @@ class Parser{
 		
 		~Parser() = default;
 
-		//std::map<cstring, handeledType> parse(int, cstring[]) noexcept(false);
+		std::map<cstring, handeledType> parse(int, cstring[]) noexcept(false);
 		static bool isCorrectName(cstring);
 		static bool isCorrectValue(cstring, Type=Type::string) noexcept(false);
 	

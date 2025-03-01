@@ -1,6 +1,6 @@
 #include "Parser.hpp"
 
-using namespace cmd;
+using namespace cmd;	//no one is including those files anyway
 using namespace util;
 
 [[ nodiscard ]] Parser::Parser(void)
@@ -25,13 +25,13 @@ using namespace util;
 
 /**
  * Returns a map with the parameter name as key and its value
- 
+ */
 [[ nodiscard ]] std::map<cstring, handeledType> Parser::parse(int argc, cstring argv[]) noexcept(false){
-	
-}*/
+	throw notImplemented("Parser::parse() is used");
+}
 
 /**
- * Checks if str is a correct argumant name.
+ * Checks if str is a correct argument name.
  */
 [[ nodiscard ]] bool Parser::isCorrectName(cstring str){
 	if(str[0] != '-' || str[1] == '\0')
@@ -95,7 +95,7 @@ using namespace util;
 		return false;
 	
 	default:
-		throw util::notImplemented("New type not implemented.");
+		throw util::notImplemented("A new type is not implemented but used.");
 	}
 }
 

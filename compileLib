@@ -40,12 +40,12 @@ fi
 cd build
 
 cmake .. && cmake --build .
-if [ "$1" = "--install" ]; then
+if [[ $? = 0 && "$1" = "--install" ]]; then
 	echo "Requiring root permission in order to copy libArgumentParser.so into /usr/lib and running ldconfig."
 	sudo cp libArgumentParser.so /usr/lib/libArgumentParser.so && sudo ldconfig /usr/lib/
 	
 	ldconfig -p | grep libArgumentParser\\.so > /dev/null
-	[ $? = 0 ] && echo "Success!."
+	[ $? = 0 ] && echo "Success!	"
 	[ $? = 1 ] && echo "An error occured."
 fi
 echo "done"
