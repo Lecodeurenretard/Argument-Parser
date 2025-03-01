@@ -32,7 +32,7 @@ if [ -d build ]; then
 		true # do nothing
 	else
 		echo "You just found a bug!"
-		exit 1
+		exit 2
 	fi
 else
 	mkdir build
@@ -41,11 +41,18 @@ cd build
 
 cmake .. && cmake --build .
 if [[ $? = 0 && "$1" = "--install" ]]; then
-	echo "Requiring root permission in order to copy libArgumentParser.so into /usr/lib and running ldconfig."
+	echo -e "\\nRequiring root permission in order to copy libArgumentParser.so into /usr/lib and running ldconfig."
 	sudo cp libArgumentParser.so /usr/lib/libArgumentParser.so && sudo ldconfig /usr/lib/
 	
 	ldconfig -p | grep libArgumentParser\\.so > /dev/null
 	[ $? = 0 ] && echo "Success!	"
 	[ $? = 1 ] && echo "An error occured."
+
+	echo -e "\\nCopying Parser.hpp..."
+	! [ -d "/usr/include/c++/nlibs" ] && sudo mkdir /usr/include/c++/nlibs
+	sudo cp ../Parser.hpp /usr/include/c++/nlibs/Parser && echo "Success!	"
+	
+	! [ -L /usr/include/nlibs ] && sudo ln -s /usr/include/c++/nlibs /usr/include/nlibs
+	# if nlibs if a file but not a symlink, it will print an error
 fi
 echo "done"
