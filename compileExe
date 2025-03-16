@@ -4,4 +4,4 @@
 ! [ -d build ] && mkdir build
 cd build
 
-g++ ../$1 libArgumentParser.so -Wl,-rpath=.
+g++ ../$1 libArgumentParser.so -L/usr/lib -lArgumentParser -lUtil -Wl,-rpath=.
