@@ -10,7 +10,7 @@
 namespace cmd {
 	/** Types of arguments */
 	enum Type {
-		undefined,		//should only be used internally & for errors, commented bc it has no use for now
+		argument,		//should only be used internally & for errors
 		boolean,
 		integer,
 		decimal,
@@ -20,17 +20,16 @@ namespace cmd {
 
 	/** An std::variant containing all corresponding types of the `Type` enum. */
 	typedef std::variant<
-		void*,
 		bool,
 		int,
 		float,
 		std::string
-	> handledType;
+	> outputType;
 	
 
 	bool to_bool(const std::string&) 			noexcept(false);
-	handledType to_value(std::string)			noexcept(false);
-	handledType to_value(Type, std::string)		noexcept(false);
+	outputType to_value(std::string)			noexcept(false);
+	outputType to_value(Type, std::string)		noexcept(false);
 
 	/** A class for parsing command line arguments. */
 	class Parser{
@@ -38,19 +37,13 @@ namespace cmd {
 			using arg_t			= std::pair<std::string, Type>;
 			using argList_t		= std::map <std::string, Type>;
 
-			Parser(void);
-			Parser(std::string, Type)		noexcept(false);
-			Parser(const arg_t&)			noexcept(false);
-			Parser(const argList_t&)		noexcept(false);
-
-			Parser(std::string, Type, bool)		noexcept(false);
-			Parser(const arg_t&, bool)			noexcept(false);
+			Parser(const argList_t&)			noexcept(false);
 			Parser(const argList_t&, bool)		noexcept(false);
 			
 			~Parser() = default;
 
-			using parseReturn_t = std::map<std::string, handledType>;
-			parseReturn_t parse(int, std::string[]) noexcept(false);
+			using parseReturn_t = std::map<std::string, outputType>;
+			parseReturn_t parse(int, const char*[]) noexcept(false);
 			
 			bool isName(std::string) const;
 
@@ -66,7 +59,7 @@ namespace cmd {
 
 		private:
 			argList_t knownArguments;
-			std::vector<std::string> knownBoolArguments;	//all boolean arguments' indexes
+			std::vector<std::string> knownBoolArguments;
 			bool parse0;
 
 			void argHandle(const arg_t&);
