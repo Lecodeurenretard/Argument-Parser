@@ -1,0 +1,41 @@
+#!/bin/bash
+
+verifyLibInstalled() {
+	ldconfig -p | grep $1 > /dev/null
+	exitCode=$?
+
+	[ $exitCode = 0 ] && echo "Successfully installed the shared libraries!"
+	[ $exitCode = 1 ] && echo "An error occured."
+}
+
+installShared() {
+	return $(sudo cp "$1" "/usr/lib/$1" && sudo ldconfig /usr/lib/)
+}
+
+areFilesThere(){
+	return $(! [[ ! -f "Parser.hpp" || ! -f "Util.hpp" || ! -f "libArgumentParser.so" || ! -f "libUtil.so" ]])
+}
+
+if ! areFilesThere; then
+	cd ..
+	if ! areFilesThere; then
+		echo "Cannot find Parser.hpp and Util.hpp in the same folder, try to move in the directory they are." 1>&2
+		exit 1
+	fi
+fi
+
+echo -e "\nRequiring root permissions to install libArgumentParser and libUtil."
+installShared libArgumentParser.so
+installShared libUtil.so
+
+verifyLibInstalled "libArgumentParser\.so"
+verifyLibInstalled "libUtil\.so"
+
+! [ -d "/usr/include/c++/nlibs" ] && sudo mkdir /usr/include/c++/nlibs	# Creates directory if doesn't exist
+
+echo -e "\\nCopying Parser.hpp..."
+sudo cp Parser.hpp	/usr/include/c++/nlibs/Parser		&& echo "Successfully copied the headers!"
+sudo cp Util.hpp		/usr/include/c++/nlibs/Util		&& echo "Successfully copied the headers!"
+	
+# if nlibs is a file but not a symlink, it will print an error
+! [ -L /usr/include/nlibs ] && sudo ln -s /usr/include/c++/nlibs /usr/include/nlibs

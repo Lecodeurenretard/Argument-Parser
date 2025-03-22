@@ -17,9 +17,10 @@ If not, you'll have to include `Parser.hpp` from where you cloned the repo, to c
 
 ### Use the compiler scripts
 There are two of them written in bash:
-+ **`compileLib`**: Compiles the Argument Parser library in the `build` directory, if it already exists will prompt the user what does he want to do.
++ **`compileLibs`**: Compiles the Argument Parser library in the `build` directory, if it already exists will prompt the user what does he want to do.
 If the `--install` argument is passed and the user can grant root permissions, will copy the compiled library and header in the `/usr/lib` and `/usr/include/c++/nlibs` folders.
-+ **`compileExe`**: Compiles an executable using the compiled dynamic library in the same folder. Pass in first argument first the file to compile and the `g++` args.  
++ **`compileExe`**: Compiles an executable using the compiled dynamic library in the same folder. Pass in first argument first the file to compile and the `g++` args.
++  **`installLibs`**: If you already have the shared libraries and the 
 
 ## Documentation
 The `Parser`, the `Type` and the `handledType` are defined in the `cmd` namespace.
@@ -155,7 +156,7 @@ Namely, all of those are correct names:
 The only correct booleans are `true` and `false` (case-sensitive).
 
 ### Number syntax
-A number may begin by a `+` or `-` sign, else they are only digits except for one point `.` for decimal numebers.  
+A number may begin by a `+` or `-` sign, else they are only digits except for one dot `.` for decimal numbers. If the first character is a dot `.`, it is implied that the whole part of the number is zero.  
 All of those are correct numbers:
 + `1234`
 + `+1234`

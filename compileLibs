@@ -1,15 +1,6 @@
 #!/bin/bash
 # This file compiles libArgumentParser.so & libUtil
 
-verifyLibInstalled() {
-	ldconfig -p | grep $1 > /dev/null
-	exitCode=$?
-
-	[ $exitCode = 0 ] && echo "Success!	"
-	[ $exitCode = 1 ] && echo "An error occured."
-
-}
-
 if [ -d build ]; then
 	echo "Already existing folder named \`build\` found."
 	echo -n "What do you want to do, r(ename existing folder), e(rase existing folder) or o(verwrite conflicting files)? "
@@ -52,19 +43,11 @@ fi
 
 cmake .. && cmake --build .
 if [[ $? = 0 && "$1" = "--install" ]]; then
-	echo -e "\\nRequiring root permission in order to copy libArgumentParser.so into /usr/lib and running ldconfig."
-	sudo cp libArgumentParser.so /usr/lib/libArgumentParser.so	&& sudo ldconfig /usr/lib/
-	sudo cp libUtil.so /usr/lib/libUtil.so 						&& sudo ldconfig /usr/lib/
-	
-	verifyLibInstalled "libArgumentParser\\.so"
-	verifyLibInstalled "libUtil\\.so"
+	cp ../Util.hpp		Util.hpp	# Copies the headers into temporary files for the install script
+	cp ../Parser.hpp	Parser.hpp
+	[[ -f installLibs ]]	&&  ./installLibs
+	[[ -f ../installLibs ]]	&& ../installLibs		# If the file doesn't exists, checks the parent directory
 
-	echo -e "\\nCopying Parser.hpp..."
-	! [ -d "/usr/include/c++/nlibs" ] && sudo mkdir /usr/include/c++/nlibs
-	sudo cp ../Parser.hpp /usr/include/c++/nlibs/Parser && echo "Success!	"
-	sudo cp ../Util.hpp /usr/include/c++/nlibs/Util && echo "Success!	"
-	
-	# if nlibs if a file but not a symlink, it will print an error
-	! [ -L /usr/include/nlibs ] && sudo ln -s /usr/include/c++/nlibs /usr/include/nlibs
+	rm Util.hpp Parser.hpp
 fi
 echo "done"
