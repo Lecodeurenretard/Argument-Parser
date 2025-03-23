@@ -98,10 +98,10 @@ Shorthand for `Parser(arguments, false)`.
 ##### `cmd::Parser::Parser(const Parser::argList_t& arguments, bool parseZero)`
 Copy all elements of `arguments` into `knownArguments` and all boolean arguments into `knownBoolArguments`, set `parse0` to `parseZero`.
 
-##### `cmd::Parser::parseReturn_t cmd::Parser::parse(int argc, const char* argv[])`
-Try to parse `argv` as an argument sequence entered via terminal. If succeed, return a map associating an `std::string` corresponding to a parsed argument with a `cmd::outputType` corresponding to its value. If an argument is not found, it will not be in the map except if it's a boolean argument (see the section on the [`Type` enum](#the-type-enum)).  
-If an invalid token is found during parsing, will throw a `cmd::Parser::parse_error`.
-May throw an `util::notImplemented` error in certain cases.
+##### `cmd::Parser::parseReturn_t cmd::Parser::parse(int argc, const char* argv[], bool guess = false)`
+Try to parse `argv` as an argument sequence entered via terminal. If succeed, return a map associating an `std::string` corresponding to a parsed argument with a `cmd::outputType` corresponding to its value. If an argument is not found, it will not be in the map except if it's a boolean argument (see the section on the [`Type` enum](#the-type-enum)). If `guess` is true, will try to guess unknown arguments' type.
+If an invalid token is found during parsing, will throw a `cmd::Parser::parse_error`.  
+For more information about parsing see [the edge cases](#edge-cases).
 
 ##### `bool cmd::Parser::isName(std::string str)`
 Check if `str` is a key of `knownArguments`.
@@ -109,10 +109,24 @@ Check if `str` is a key of `knownArguments`.
 ##### `static bool isCorrectName(std::string str)`
 Check if `str` is a correct argument name (see [argument syntax](#argument-syntax)).
 
+##### `static cmd::Type guessType(std::string value)`
+Try to guess what type could be `value`, if it does not fit any type, return `Type::argument`.
+
 ##### `static bool Parser::isCorrectValue(std::string str, Type expectedType = Type::string)`
 Check if `str` is a correct value for the given `expectedType` (see [argument syntax](#argument-syntax)).  
 If `expectedType` is `Type::argument`, will always return `false`.  
 If `expectedType` is `Type::string`, will always return `true`.  
+
+
+### Edge cases
+#### Specifing the same argument multiple times
+The returned value will be the last entered.
+```bash
+argParser --hello 1 --hello 2 # The value of --hello will be 2
+```
+
+#### Having an empty string as an argument
+The `parse()` method will throw an error because it uses it as an error value.
 
 ## Using the library
 Now you know what each function does, you can learn how to use them. A typical use would be this one:
@@ -122,7 +136,7 @@ Now you know what each function does, you can learn how to use them. A typical u
 int main(int argc, const char* argv[]){
 	cmd::Parser parser({
 			{"--arg"		, cmd::Type::boolean},
-			{"--argument"		, cmd::Type::string},
+			{"--argument"	, cmd::Type::string},
 			//...
 	});
 	
@@ -132,7 +146,7 @@ int main(int argc, const char* argv[]){
 		//do something
 	}
 
-	if(userInput.contains("--argument2")){	//same
+	if(userInput.contains("--argument2")){	//same but --argument2 is not a boolean
 		//do something
 	}
 }

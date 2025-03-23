@@ -43,12 +43,13 @@ namespace cmd {
 			~Parser() = default;
 
 			using parseReturn_t = std::map<std::string, outputType>;
-			parseReturn_t parse(int, const char*[]) noexcept(false);
+			parseReturn_t parse(int, const char*[], bool=false) noexcept(false);
 			
 			bool isName(std::string) const;
 
 			static bool isCorrectName(std::string);
 			static bool isCorrectValue(std::string, Type=Type::string) noexcept(false);
+			static Type guessType(std::string);
 		
 			/** When `parse()` is not expecting something. */
 			class parse_error : public std::runtime_error {

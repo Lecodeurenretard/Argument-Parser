@@ -46,6 +46,9 @@ namespace cmd {
 	 * Guess the type of `t` and convert to it
 	 */
 	[[ nodiscard ]] outputType to_value(std::string value) noexcept(false){
+		if(value == "\0")
+			throw std::runtime_error("Empty strings are NOT allowed in `to_value()`");
+		
 		outputType res;
 
 		if(Parser::isCorrectValue(value, Type::boolean)){
@@ -69,6 +72,9 @@ namespace cmd {
 	 * Convert `value` to the corresponding type `Type` (see `outputType` for more info).
 	 */
 	[[ nodiscard ]] outputType to_value(Type t, std::string value) noexcept(false){
+		if(value == "\0")
+			throw std::runtime_error("Empty strings are NOT allowed in `to_value()`");
+		
 		outputType res;
 		switch (t) {
 			case Type::argument:
@@ -76,25 +82,25 @@ namespace cmd {
 
 			case Type::boolean:
 				if(!Parser::isCorrectValue(value, Type::boolean))
-					throw std::invalid_argument("The parameter `value` in `cmd::to_value()` can't be converted to a " + to_string(Type::boolean) + ".");
+					throw std::invalid_argument("The parameter `value` ("+ value +") in `cmd::to_value()` can't be converted to a " + to_string(Type::boolean) + ".");
 				res = to_bool(value);
 				break;
 
 			case Type::integer:
 				if(!Parser::isCorrectValue(value, Type::integer))
-					throw std::invalid_argument("The parameter `value` in `cmd::to_value()` can't be converted to a " + to_string(Type::integer) + ".");
+					throw std::invalid_argument("The parameter `value` ("+ value +") in `cmd::to_value()` can't be converted to an " + to_string(Type::integer) + ".");
 				res = std::atoi(value.c_str());
 				break;
 			
 			case Type::decimal:
 				if(!Parser::isCorrectValue(value, Type::decimal))
-					throw std::invalid_argument("The parameter `value` in `cmd::to_value()` can't be converted to a " + to_string(Type::decimal) + ".");
+					throw std::invalid_argument("The parameter `value` ("+ value +") in `cmd::to_value()` can't be converted to a " + to_string(Type::decimal) + ".");
 				res = (float)std::atof(value.c_str());
 				break;
 			
 			case Type::string:
 				if(!Parser::isCorrectValue(value, Type::string))
-					throw std::invalid_argument("The parameter `value` in `cmd::to_value()` can't be converted to a " + to_string(Type::string) + ".");
+					throw std::invalid_argument("The parameter `value` ("+ value +") in `cmd::to_value()` can't be converted to a " + to_string(Type::string) + ".");
 				res = value;
 				break;
 			
@@ -115,41 +121,70 @@ namespace cmd {
 		for(auto pair : arguments){
 			if(!isCorrectName(pair.first))
 				throw std::invalid_argument("The name `"+ pair.first +"` is an invalid argument name.");
-			argHandle(pair);
+			
+			if(pair.second == Type::boolean)
+				knownBoolArguments.push_back(pair.first);
+			
+			knownArguments[pair.first] = pair.second;
 		}
 	}
 
 	/**
 	 * Parses `argv` up to `argv[argc]`, if the instance is initialized with `parse0` set to `false` will ignore `argv[0]`.
+	 * @param argc The number of token to parse.
+	 * @param argv An array containing all tokens.
+	 * @param guess If the function should try to guess the type of unknown arguments, if set to false will throw an error in this situation.
 	 */
-	[[ nodiscard ]] Parser::parseReturn_t Parser::parse(int argc, const char* argv[]) noexcept(false){
+	[[ nodiscard ]] Parser::parseReturn_t Parser::parse(int argc, const char* argv[], bool guess /*=false*/) noexcept(false){
 		Parser::parseReturn_t res;
 
 		Type expected(Type::argument);
 		if(!parse0 && argc <= 1)
 			throw std::overflow_error("The member `Parser.parse0` = "+ std::to_string(parse0) +" creates an overflow (try to set it to true).");
-		for(int i = !parse0; i < argc; i++){
-			const std::string lastToken	((i == 0)		? "\0" : argv[i-1]);
-			const std::string nextToken	((i+1 >= argc)	? "\0" : argv[i+1]);
+		for(int i = !parse0; i < argc; i++){			
+			if(argv[i] == nullptr || (argv[i+1] == nullptr && i+1 < argc))
+				throw std::logic_error("The parameter `argc` ("+ std::to_string(argc) +") is greater than the real size of `argv` (either "+ std::to_string(i) +" or "+ std::to_string(i+1) +")");
 
-			const std::string currentToken(argv[i]);
-
-
-			if(expected == Type::argument && !isName(currentToken))
-				throw parse_error("Expected a defined argument name in `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.");
+			const std::string& lastToken	((i == 0)		? "\0" : argv[i-1]);
+			const std::string& nextToken	((i+1 >= argc)	? "\0" : argv[i+1]);
 			
+			const std::string& currentToken(argv[i]);
+
+			if(currentToken == "\0")
+				throw std::invalid_argument("Empty strings are not allowed as arguments.");
 			if(!isCorrectName(currentToken) && !isCorrectValue(currentToken, expected))
 				throw parse_error("The current token ("+ std::string(currentToken) +") is not an argument name nor a value of type " + to_string(expected) + ".");
-
+			
 			if(expected != Type::argument){
 				if(lastToken == "\0")
-					throw parse_error("Expected the argument at index "+ std::to_string(i) +" to be a value but it is argument.");
+					throw parse_error("Expected the argument at index "+ std::to_string(i) +" to be a value but it is an argument.");
 				res[lastToken] = to_value(knownArguments[lastToken], currentToken);	//assigning values
 				
 				expected = Type::argument;
 				continue;
 			}
 
+
+			if(!isName(currentToken)){
+				if (!guess)
+					throw parse_error("Expected a defined argument name since the `guess` argument is false in `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.");
+				
+				if(isCorrectName(nextToken)){
+					//expected = Type::argument;	//implied
+					knownArguments[currentToken] = Type::boolean;
+					res[currentToken] = true;
+					continue;
+				}
+
+				expected = guessType(nextToken);
+				if(expected == Type::argument)
+					throw parse_error("The token at index "+ std::to_string(i+1) +" ("+ nextToken +") is not a valid argument.");
+					
+				knownArguments[currentToken] = expected;
+				continue;
+				
+			}
+			
 			if(std::find(knownBoolArguments.begin(), knownBoolArguments.end(), currentToken) != knownBoolArguments.end() && isCorrectName(nextToken)) {	//if the argument is a boolean
 				res[currentToken] = true;
 				expected = Type::argument;
@@ -249,23 +284,36 @@ namespace cmd {
 	}
 
 
-	Parser::parse_error::parse_error(const char str[])
-		: runtime_error(str)
-	{}
-
-	Parser::parse_error::parse_error(const std::string& str)
-		: runtime_error(str)
-	{}
-
 	/**
-	 * Function called by constructors. It's the code they have in common.
+	 * Try to guess what type could be `value` (assumes it is a value), if it does not fit any type, return `Type::argument`.
 	 */
-	void Parser::argHandle(const arg_t& pair){
-		//Registering bool elems in `knownBoolArguments`
-		if(pair.second == Type::boolean)
-			knownBoolArguments.push_back(pair.first);
-		knownArguments[pair.first] = pair.second;
+	[[ nodiscard ]] Type Parser::guessType(std::string value){
+		if(value == "\0")
+			return Type::argument;
+
+
+		if (Parser::isCorrectValue(value, Type::boolean))
+			return Type::boolean;
+		
+		if (Parser::isCorrectValue(value, Type::integer))
+			return Type::integer;
+
+		if (Parser::isCorrectValue(value, Type::decimal))
+			return Type::decimal;
+		
+		if (Parser::isCorrectValue(value, Type::string))	//If I ever add a new condition for the string type, this makes sure I don't forget what's going on
+			return Type::string;
+		
+		return Type::argument;
 	}
+
+	[[ nodiscard ]] Parser::parse_error::parse_error(const char str[])
+		: runtime_error(str)
+	{}
+
+	[[ nodiscard ]] Parser::parse_error::parse_error(const std::string& str)
+		: runtime_error(str)
+	{}
 }
 
 
@@ -273,20 +321,20 @@ namespace cmd {
 /**
  * Check if `c` is an upper or lowercase letter.
  */
-bool std::isalpha(char c){
+[[ nodiscard ]] bool std::isalpha(char c){
 	return std::isalpha(static_cast<unsigned char>(c));
 }
 
 /**
  * Check if `c` is a number.
  */
-bool std::isdigit(char c){
+[[ nodiscard ]] bool std::isdigit(char c){
 	return std::isdigit(static_cast<unsigned char>(c));
 }
 
 /**
  * Check if `c` is a whitespace (' ', a newline, a tab, ...).
  */
-bool std::isspace(char c){
+[[ nodiscard ]] bool std::isspace(char c){
 	return std::isspace(static_cast<unsigned char>(c));
 }
