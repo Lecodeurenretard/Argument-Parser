@@ -109,9 +109,6 @@ Check if `str` is a key of `knownArguments`.
 ##### `static bool isCorrectName(std::string str)`
 Check if `str` is a correct argument name (see [argument syntax](#argument-syntax)).
 
-##### `static cmd::Type guessType(std::string value)`
-Try to guess what type could be `value`, if it does not fit any type, return `Type::argument`.
-
 ##### `static bool Parser::isCorrectValue(std::string str, Type expectedType = Type::string)`
 Check if `str` is a correct value for the given `expectedType` (see [argument syntax](#argument-syntax)).  
 If `expectedType` is `Type::argument`, will always return `false`.  

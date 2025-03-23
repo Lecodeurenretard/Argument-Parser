@@ -112,19 +112,27 @@ namespace cmd {
 	}
 
 	[[ nodiscard ]] Parser::Parser(void)
-		: Parser(false)
+		: Parser(false, false)
 	{}
 
 	[[ nodiscard ]] Parser::Parser(bool parseZero)
-		: knownArguments(), knownBoolArguments(), parse0(parseZero)
+		: Parser(parseZero, false)
+	{}
+
+	[[ nodiscard ]] Parser::Parser(bool parseZero, bool guess)
+		: knownArguments(), knownBoolArguments(), parse0(parseZero), argumentGuess(guess)
 	{}
 
 	[[ nodiscard ]] Parser::Parser(const argList_t& arguments) noexcept(false)
-		: Parser(arguments, false)
+		: Parser(arguments, false, false)
 	{}
 
-	[[ nodiscard ]] Parser::Parser(const Parser::argList_t& arguments, bool parseZero) noexcept(false)
-		: knownArguments(), knownBoolArguments(), parse0(parseZero)
+	[[ nodiscard ]] Parser::Parser(const argList_t& arguments, bool parseZero) noexcept(false)
+		: Parser(arguments, parseZero, false)
+	{}
+
+	[[ nodiscard ]] Parser::Parser(const Parser::argList_t& arguments, bool parseZero, bool guess) noexcept(false)
+		: knownArguments(), knownBoolArguments(), parse0(parseZero), argumentGuess(guess)
 	{
 		for(auto pair : arguments){
 			if(!isCorrectName(pair.first))
@@ -143,7 +151,7 @@ namespace cmd {
 	 * @param argv An array containing all tokens.
 	 * @param guess If the function should try to guess the type of unknown arguments, if set to false will throw an error in this situation.
 	 */
-	[[ nodiscard ]] Parser::parseReturn_t Parser::parse(int argc, const char* argv[], bool guess /*=false*/) noexcept(false){
+	[[ nodiscard ]] Parser::parseReturn_t Parser::parse(int argc, const char* argv[]) noexcept(false){
 		Parser::parseReturn_t res;
 
 		Type expected(Type::argument);
@@ -172,9 +180,13 @@ namespace cmd {
 				continue;
 			}
 
+			if(isCombinedName(currentToken)){
+				throw notImplemented("Argument split is not implemented yet.");
+			}
+
 
 			if(!isName(currentToken)){
-				if (!guess)
+				if (!argumentGuess)
 					throw parse_error("Expected a defined argument name since the `guess` argument is false in `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.");
 				
 				if(isCorrectName(nextToken)){
@@ -295,6 +307,15 @@ namespace cmd {
 	}
 
 
+
+	[[ nodiscard ]] Parser::parse_error::parse_error(const char str[])
+		: runtime_error(str)
+	{}
+
+	[[ nodiscard ]] Parser::parse_error::parse_error(const std::string& str)
+		: runtime_error(str)
+	{}
+	
 	/**
 	 * Try to guess what type could be `value` (assumes it is a value), if it does not fit any type, return `Type::argument`.
 	 */
@@ -318,13 +339,31 @@ namespace cmd {
 		return Type::argument;
 	}
 
-	[[ nodiscard ]] Parser::parse_error::parse_error(const char str[])
-		: runtime_error(str)
-	{}
+	/**
+	 * Checks if `name` is multiple single letter boolean arguments names.
+	 */
+	[[ nodiscard ]] bool Parser::isCombinedName(std::string str){
+		if(str[0] != '-')
+			return false;
+		
+		for(uint i = 1; i < str.length(); i++){
+			if(!std::isalpha(str[i]))
+				return false;
+			
 
-	[[ nodiscard ]] Parser::parse_error::parse_error(const std::string& str)
-		: runtime_error(str)
-	{}
+			const std::string currentArg = "-" + std::string(1, str[i]);
+			if(!argumentGuess && !isName(currentArg))	//if argument guessing is disabled and the current name is not defined
+				return false;
+			if(!isName(std::string(1, str[i]))){
+				knownArguments[currentArg] = Type::boolean;
+				knownBoolArguments.push_back(currentArg);
+			}
+			
+			if(knownArguments[currentArg] != Type::boolean)
+				return false;
+		}
+		return true;
+	}
 }
 
 

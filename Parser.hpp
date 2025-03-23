@@ -37,19 +37,20 @@ namespace cmd {
 
 			Parser(void);
 			Parser(bool);
+			Parser(bool, bool);
 			Parser(const argList_t&)			noexcept(false);
 			Parser(const argList_t&, bool)		noexcept(false);
+			Parser(const argList_t&, bool, bool)		noexcept(false);
 			
 			~Parser() = default;
 
 			using parseReturn_t = std::map<std::string, outputType>;
-			parseReturn_t parse(int, const char*[], bool=false) noexcept(false);
+			parseReturn_t parse(int, const char*[]) noexcept(false);
 			
 			bool isName(std::string) const;
 
 			static bool isCorrectName(std::string);
 			static bool isCorrectValue(std::string, Type=Type::string) noexcept(false);
-			static Type guessType(std::string);
 		
 			/** When `parse()` is not expecting something. */
 			class parse_error : public std::runtime_error {
@@ -62,8 +63,10 @@ namespace cmd {
 			argList_t knownArguments;
 			std::vector<std::string> knownBoolArguments;
 			bool parse0;
+			bool argumentGuess;
 
-			void argHandle(const arg_t&);
+			static Type guessType(std::string);
+			bool isCombinedName(std::string);
 	};
 }
 
