@@ -111,12 +111,20 @@ namespace cmd {
 		return res;
 	}
 
+	[[ nodiscard ]] Parser::Parser(void)
+		: Parser(false)
+	{}
+
+	[[ nodiscard ]] Parser::Parser(bool parseZero)
+		: knownArguments(), knownBoolArguments(), parse0(parseZero)
+	{}
+
 	[[ nodiscard ]] Parser::Parser(const argList_t& arguments) noexcept(false)
 		: Parser(arguments, false)
 	{}
 
 	[[ nodiscard ]] Parser::Parser(const Parser::argList_t& arguments, bool parseZero) noexcept(false)
-		: knownArguments(), parse0(parseZero)
+		: knownArguments(), knownBoolArguments(), parse0(parseZero)
 	{
 		for(auto pair : arguments){
 			if(!isCorrectName(pair.first))
@@ -229,6 +237,9 @@ namespace cmd {
 	 * @param expectedType What should str represent? If set to `Type::argument`, return `false`.
 	 */
 	[[ nodiscard ]] bool Parser::isCorrectValue(std::string str, Type expectedType /*= Type::string*/) noexcept(false){
+		if(str == "\0")
+			return false;
+
 		switch (expectedType){
 		case Type::boolean: 
 			return str == "true" || str == "false";

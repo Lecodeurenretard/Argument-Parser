@@ -1,11 +1,9 @@
 #include <variant>
 #include <algorithm>
-
+#include <nlibs/Util>
 
 /** The theoraticaly maximum number of chars in a string (in reality, it's less) */
 #define STRING_MAX std::string().max_size()
-
-#include <nlibs/Util>
 
 namespace cmd {
 	/** Types of arguments */
@@ -37,6 +35,8 @@ namespace cmd {
 			using arg_t			= std::pair<std::string, Type>;
 			using argList_t		= std::map <std::string, Type>;
 
+			Parser(void);
+			Parser(bool);
 			Parser(const argList_t&)			noexcept(false);
 			Parser(const argList_t&, bool)		noexcept(false);
 			

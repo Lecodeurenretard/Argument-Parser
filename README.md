@@ -17,10 +17,10 @@ If not, you'll have to include `Parser.hpp` from where you cloned the repo, to c
 
 ### Use the compiler scripts
 There are two of them written in bash:
-+ **`compileLibs`**: Compiles the Argument Parser library in the `build` directory, if it already exists will prompt the user what does he want to do.
-If the `--install` argument is passed and the user can grant root permissions, will copy the compiled library and header in the `/usr/lib` and `/usr/include/c++/nlibs` folders.
++ **`compileLibs`**: Compiles the Argument Parser library in the `build` directory, if it already exists will prompt the user what does he want to do.  
+If the `--install` argument is passed and the user grants root permissions, will copy the compiled library and header in the `/usr/lib` and `/usr/include/c++/nlibs` folders.
 + **`compileExe`**: Compiles an executable using the compiled dynamic library in the same folder. Pass in first argument first the file to compile and the `g++` args.
-+  **`installLibs`**: If you already have the shared libraries and the 
++  **`installLibs`**: If you already have the shared libraries and the header, you can use it in order to install the library.
 
 ## Documentation
 The `Parser`, the `Type` and the `handledType` are defined in the `cmd` namespace.
@@ -126,7 +126,7 @@ argParser --hello 1 --hello 2 # The value of --hello will be 2
 ```
 
 #### Having an empty string as an argument
-The `parse()` method will throw an error because it uses it as an error value.
+The `parse()` method will throw an error because it uses the `"\0"` value as an error value.
 
 ## Using the library
 Now you know what each function does, you can learn how to use them. A typical use would be this one:
@@ -154,8 +154,6 @@ int main(int argc, const char* argv[]){
 In the end you only need to know only the `Parser.parse()` method but I think it's intrestreing to know about the rest.
 
 ## Argument syntax
-Each type has its syntax:
-
 ### Argument name syntax
 The argument names have to begin with a dash `-` and if they have more than one letter they should have one more. All names must have one dash `-` (appart of the begining one(s)) or letter.  
 Namely, all of those are correct names:
@@ -167,7 +165,7 @@ Namely, all of those are correct names:
 + `---`
 
 ### Boolean syntax
-The only correct booleans are `true` and `false` (case-sensitive).
+The only correct boolean values are `true` and `false` (case-sensitive).
 
 ### Number syntax
 A number may begin by a `+` or `-` sign, else they are only digits except for one dot `.` for decimal numbers. If the first character is a dot `.`, it is implied that the whole part of the number is zero.  
@@ -179,4 +177,4 @@ All of those are correct numbers:
 + `-.1234`
 
 ### String syntax
-All sequence of characters (except those above the string size limit) are correct strings.
+All sequence of characters except those above the string size limit are correct strings. This does **not** include empty strings.
