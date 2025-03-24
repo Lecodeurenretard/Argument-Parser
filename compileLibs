@@ -42,7 +42,8 @@ elif [[ $(pwd) != */build ]]; then
 fi
 
 cmake .. && cmake --build .
-if [[ $? = 0 && "$1" = "--install" ]]; then
+exitCode=$?
+if [[ $exitCode = 0 && "$1" = "--install" ]]; then
 	cp ../Util.hpp		Util.hpp	# Copies the headers into temporary files for the install script
 	cp ../Parser.hpp	Parser.hpp
 	[[ -f installLibs ]]	&&  ./installLibs
@@ -51,3 +52,4 @@ if [[ $? = 0 && "$1" = "--install" ]]; then
 	rm Util.hpp Parser.hpp
 fi
 echo "done"
+exit $exitCode

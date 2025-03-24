@@ -161,7 +161,7 @@ namespace cmd {
 			if(argv[i] == nullptr || (argv[i+1] == nullptr && i+1 < argc))
 				throw std::logic_error("The parameter `argc` ("+ std::to_string(argc) +") is greater than the real size of `argv` (either "+ std::to_string(i) +" or "+ std::to_string(i+1) +")");
 
-			const std::string& lastToken	((i == 0)		? "\0" : argv[i-1]);
+			const std::string& previousToken	((i == 0)		? "\0" : argv[i-1]);
 			const std::string& nextToken	((i+1 >= argc)	? "\0" : argv[i+1]);
 			
 			const std::string& currentToken(argv[i]);
@@ -169,27 +169,36 @@ namespace cmd {
 			if(currentToken == "\0")
 				throw std::invalid_argument("Empty strings are not allowed as arguments.");
 			if(!isCorrectName(currentToken) && !isCorrectValue(currentToken, expected))
-				throw parse_error("The current token ("+ std::string(currentToken) +") is not an argument name nor a value of type " + to_string(expected) + ".");
+				throw parse_error("The `"+ std::string(currentToken) +"` token is not an argument name nor a value of type " + to_string(expected) + ".");
 			
 			if(expected != Type::argument){
-				if(lastToken == "\0")
+				if(previousToken == "\0")
 					throw parse_error("Expected the argument at index "+ std::to_string(i) +" to be a value but it is an argument.");
-				res[lastToken] = to_value(knownArguments[lastToken], currentToken);	//assigning values
+				res[previousToken] = to_value(knownArguments[previousToken], currentToken);	//assigning values
 				
 				expected = Type::argument;
 				continue;
 			}
 
-			if(isCombinedName(currentToken)){
-				throw notImplemented("Argument split is not implemented yet.");
+			const bool isCurrentCombinedName(isCombinedName(currentToken));
+			if(isCurrentCombinedName){	
+				//same but set all to `true`
+				for(size_t i = 1; i < currentToken.size(); i++){
+					const char arg[3] = {'-', currentToken[i], '\0'};
+					res[arg] = true;
+				}
+				expected = Type::argument;
+				continue;
 			}
-
+			if(isCurrentCombinedName){
+				throw parse_error("Expected a boolean value at token `"+ currentToken +"` (at index "+ std::to_string(i) +").");
+			}
 
 			if(!isName(currentToken)){
 				if (!argumentGuess)
-					throw parse_error("Expected a defined argument name since the `guess` argument is false in `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.");
+					throw parse_error("Expected a defined argument name since the `guess` member is false for `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.");
 				
-				if(isCorrectName(nextToken)){
+				if(isCorrectName(nextToken) || i+1 >= argc){
 					//expected = Type::argument;	//implied
 					knownArguments[currentToken] = Type::boolean;
 					res[currentToken] = true;
@@ -198,20 +207,19 @@ namespace cmd {
 
 				expected = guessType(nextToken);
 				if(expected == Type::argument)
-					throw parse_error("The token at index "+ std::to_string(i+1) +" ("+ nextToken +") is not a valid argument.");
+					throw parse_error("The token at index "+ std::to_string(i+1) +" ("+ nextToken +") is not a valid value.");
 					
 				knownArguments[currentToken] = expected;
 				continue;
-				
 			}
 			
+			//else `currentToken` is the name of an argument
 			if(std::find(knownBoolArguments.begin(), knownBoolArguments.end(), currentToken) != knownBoolArguments.end() && isCorrectName(nextToken)) {	//if the argument is a boolean
 				res[currentToken] = true;
 				expected = Type::argument;
 				continue;
 			}
 			
-			//else `currentToken` is the name of an argument
 			expected = knownArguments[currentToken];
 		}
 		for(auto boolArg : knownBoolArguments)
@@ -224,8 +232,8 @@ namespace cmd {
 	/**
 	 * Checks if `str` exists in `knownArgument`.
 	 */
-	[[ nodiscard ]] bool Parser::isName(std::string str) const {
-		return knownArguments.find(str) != knownArguments.end();
+	[[ nodiscard ]] bool Parser::isName(const std::string& str) const {
+		return knownArguments.contains(str);
 	}
 
 
@@ -236,7 +244,7 @@ namespace cmd {
 		if(str[0] != '-' || str.size() < 2)
 			return false;
 
-		for (uint i = 1; str[i] != '\0' ; i++){		//until reaching the null terminator
+		for (size_t i = 1; i < str.size(); i++){		//until reaching the null terminator
 			if(str[i] == ' ' || (!std::isalpha(str[i]) && str[i] != '-'))
 				return false;
 		}
@@ -299,7 +307,7 @@ namespace cmd {
 			return true;
 		
 		case Type::argument:
-			return false;
+			return false;	// If this method is used, that's a bug. This makes more easy to track it down
 		
 		default:
 			throw util::notImplemented("A new type is not implemented but used in `cmd::Parser::isCorrectValue()`.");
@@ -319,7 +327,7 @@ namespace cmd {
 	/**
 	 * Try to guess what type could be `value` (assumes it is a value), if it does not fit any type, return `Type::argument`.
 	 */
-	[[ nodiscard ]] Type Parser::guessType(std::string value){
+	[[ nodiscard ]] Type Parser::guessType(const std::string& value){
 		if(value == "\0")
 			return Type::argument;
 
@@ -342,19 +350,21 @@ namespace cmd {
 	/**
 	 * Checks if `name` is multiple single letter boolean arguments names.
 	 */
-	[[ nodiscard ]] bool Parser::isCombinedName(std::string str){
-		if(str[0] != '-')
+	[[ nodiscard ]] bool Parser::isCombinedName(const std::string& str){
+		if(str[0] != '-' || str.size() <= 2)
 			return false;
 		
-		for(uint i = 1; i < str.length(); i++){
+		for(size_t i = 1; i < str.length(); i++){
 			if(!std::isalpha(str[i]))
 				return false;
 			
 
-			const std::string currentArg = "-" + std::string(1, str[i]);
-			if(!argumentGuess && !isName(currentArg))	//if argument guessing is disabled and the current name is not defined
+			const std::string currentArg("-" + std::string(1, str[i]));	//the current char with a dash before
+			const bool isCurrentArgName(isName(currentArg));
+
+			if(!argumentGuess && !isCurrentArgName)	//if argument guessing is disabled and the current name is not defined
 				return false;
-			if(!isName(std::string(1, str[i]))){
+			if(!isCurrentArgName){	//it has to be a correct name because it's a dash and a letter
 				knownArguments[currentArg] = Type::boolean;
 				knownBoolArguments.push_back(currentArg);
 			}

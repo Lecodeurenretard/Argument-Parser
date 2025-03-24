@@ -47,7 +47,7 @@ namespace cmd {
 			using parseReturn_t = std::map<std::string, outputType>;
 			parseReturn_t parse(int, const char*[]) noexcept(false);
 			
-			bool isName(std::string) const;
+			bool isName(const std::string&) const;
 
 			static bool isCorrectName(std::string);
 			static bool isCorrectValue(std::string, Type=Type::string) noexcept(false);
@@ -59,14 +59,15 @@ namespace cmd {
 				parse_error(const std::string&);
 			};
 
+			bool isCombinedName(const std::string&);
 		private:
 			argList_t knownArguments;
 			std::vector<std::string> knownBoolArguments;
 			bool parse0;
 			bool argumentGuess;
+			
+			static Type guessType(const std::string&);
 
-			static Type guessType(std::string);
-			bool isCombinedName(std::string);
 	};
 }
 

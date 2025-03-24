@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [[ $1 = "--libs" ]]; then
+	echo 'o' > ../tmp
+
+	cd ..
+	./compileLibs --install < tmp
+	errorCode=$?
+	cd test
+
+	rm ../tmp
+	[[ $errorCode != 0 ]] && exit $errorCode
+fi
+
+echo "Compiling the type test"
+g++ types.cpp -o testType -std=gnu++23  -Wall -L/usr/lib -lArgumentParser -lUtil -g -fsanitize=address
+tExit=$?
+
+echo "Compiling the parser test"
+g++ parser.cpp -o testParser -std=gnu++23  -Wall -L/usr/lib -lArgumentParser -lUtil -g -fsanitize=address
+pExit=$?
+
+echo "Compiling the free test"
+g++ free.cpp -o testFree -std=gnu++23  -Wall -L/usr/lib -lArgumentParser -lUtil -g -fsanitize=address
+
+
+[[ $tExit = 0 ]] && echo -e "\nRunning the type test"
+[[ $tExit = 0 ]] && ./testType
+
+[[ $pExit = 0 ]] && echo -e "\nRunning the parser test" || echo -e "\nNot running the parser test"
+[[ $pExit = 0 ]] && ./testParser
