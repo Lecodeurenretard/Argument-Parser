@@ -38,7 +38,9 @@ int main(int argc, const char* argv[]){
 			{"-d"	, Type::decimal},
 	};
 	Parser parser(
-		list
+		list,
+		true,
+		true
 	);
 
 	printRes(parser.parse(argc, argv));

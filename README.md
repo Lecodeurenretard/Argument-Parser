@@ -30,6 +30,8 @@ If you need a documentation to for each function, you can go to the [code docume
 ## Features and parsing edge cases
 In order to present some features let's say you have a C++ file named _argParser.cpp_ compiling to the executable _argParser_. The `parser` variable is an instance of `Parser` and `res` the result of parsing arguments from the command line.
 
+<!--Positional arguments disabled-->
+
 ### Grouping one letter boolean arguments
 Even if you think that's pretty specific, it is useful.
 

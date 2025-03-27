@@ -1,4 +1,5 @@
 #include <nlibs/Parser>
+#include <nlibs/colors.h>	//from misc_modules
 #include <cassert>
 #include <iostream>
 
@@ -78,7 +79,7 @@ Parser::parseReturn_t run(int len, const char* arr[]){
 }
 
 int main(void){
-	std::cout << "Testing return values\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing return values\n"	<< COLOR_FG_RESET;
 	constexpr size_t testLength = 13;
 	const char* testArray[testLength] = {
 		"-t",
@@ -94,20 +95,20 @@ int main(void){
 	assert(res.contains("--unknown")	== false);
 	assert(res.contains("-o")			== false);
 	
-	std::cout << "Testing bools\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing bools\n"			<< COLOR_FG_RESET;
 	assert(std::get<bool>(res["-t"])			== true);
 	assert(std::get<bool>(res["-b"])			== false);
 	assert(std::get<bool>(res["--false"])		== false);
 	
-	std::cout << "Testing ints\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing ints\n"			<< COLOR_FG_RESET;
 	assert(std::get<int>(res["-u"])				==  123456789);
 	assert(std::get<int>(res["-i"])				== -123456789);
 	
-	std::cout << "Testing floats\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing floats\n"			<< COLOR_FG_RESET;
 	assert(std::get<float>(res["-f"])			== (float)(-1.23456789 * 100000000));
 	assert(std::get<float>(res["-d"])			== (float)(-0.6));
 	
-	std::cout << "Testing strings\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing strings\n"		<< COLOR_FG_RESET;
 	assert(std::get<std::string>(res["--string"])	== "hello");
 
 
@@ -124,7 +125,7 @@ int main(void){
 		"-i", "45"
 	};
 	
-	std::cout << "Testing redundancy\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing redundancy\n"		<< COLOR_FG_RESET;
 	res = run(doubleLength, doubleArray);
 	
 	assert(std::get<std::string>(res["-s"])	== "1");
@@ -132,7 +133,7 @@ int main(void){
 	assert(std::get<bool>(res["-b"])		== true);
 
 
-	std::cout << "Testing argument guessing\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing argument guessing\n" << COLOR_FG_RESET;
 	constexpr int guessLength = 11;
 	const char* guessArray[guessLength] = {
 		"--ustr"	, "Hello!"	,
@@ -164,7 +165,7 @@ int main(void){
 
 
 
-	std::cout << "NOT Checking isCombinedName() because it is private.\n";
+	std::cout << COLOR_FG_YELLOW << "NOT Checking isCombinedName() because it is private.\n" << COLOR_FG_RESET;
 	/*assert(parser.isCombinedName("-ba")							== true);
 	assert(parser.isCombinedName("-bb")								== true);
 	assert(parser.isCombinedName("-aba")							== true);
@@ -182,7 +183,7 @@ int main(void){
 
 
 
-	std::cout << "Testing argument splitting\n";
+	std::cout << COLOR_FG_BYELLOW << "Testing argument splitting\n" << COLOR_FG_RESET;
 	constexpr int splitLength = 4;
 	const char* splitArray[splitLength] = {
 		"-bt"	,
@@ -200,4 +201,6 @@ int main(void){
 	
 	assert(std::get<bool>(res["--true"])			== false);
 	assert(std::get<bool>(res["--false"])			== false);
+
+	std::cout << COLOR_FG_GREEN << "Success!" << COLOR_FG_RESET << std::endl;
 }

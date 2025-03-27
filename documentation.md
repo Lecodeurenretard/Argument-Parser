@@ -66,7 +66,10 @@ A list of arguments provided by the user.
 All boolean arguments provided by the user.
 
 #### `bool parse0`
-If the methods of the class should process the first argument given in an `argList_t`.
+If the methods of the class should process the first argument given in an `argList_t`, should turn be turned off for real command line parsing since `argv[0]` is the executable's name.
+
+#### `bool argumentGuess`
+If the parsing method should try to guess the type of an unknown argument. If `false` they will throw an error when finding an unknown argument name.
 
 ### Methods (all public)
 #### `cmd::Parser::Parser(const Parser::argList_t& arguments)`
