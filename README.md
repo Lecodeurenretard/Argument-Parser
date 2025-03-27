@@ -47,8 +47,8 @@ if(std::get<bool>(res["-c"]))
 
 and the user enters in the terminal:
 ```bash
-argParser -abc		# all message will show
-argParser -ac		# all message but the second one will show
+argParser -abc		# all messages will be printed
+argParser -ac		# all messages but the second one will be printed
 ```
 
 ### Specifing the same argument multiple times
