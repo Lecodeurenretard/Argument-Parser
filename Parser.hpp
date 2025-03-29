@@ -1,6 +1,12 @@
 #include <variant>
 #include <algorithm>
-#include "Util.hpp"
+
+#if __has_include(<nlibs/Util>)
+	#include <nlibs/Util>
+#else
+	#include "Util.hpp"		//if the user has not the library installed yet
+#endif
+
 
 namespace cmd {
 	/** Types of arguments */
@@ -54,6 +60,17 @@ namespace cmd {
 			public: 
 				parse_error(const char[]);
 				parse_error(const std::string&);
+			};
+
+			/** When `parse()` is not expecting something. */
+			class unknownArgument_error : public parse_error {
+			private:
+				std::string argName;
+			public: 
+				unknownArgument_error(const char[], const char[]);
+				unknownArgument_error(const std::string&, const std::string&);
+
+				const std::string& getArgName(void) const;
 			};
 
 		private:

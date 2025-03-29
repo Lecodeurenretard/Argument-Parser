@@ -1,4 +1,4 @@
-#include "Parser.hpp"
+#include <nlibs/Parser>
 #include <iostream>
 using namespace util;
 
@@ -45,7 +45,7 @@ namespace cmd {
 	 */
 	[[ nodiscard ]] outputType to_value(std::string value) noexcept(false){
 		if(value == "\0")
-			throw std::runtime_error("Empty strings are NOT allowed in `to_value()`");
+			throw std::invalid_argument("Empty strings are NOT allowed in `to_value()`");
 
 
 		//could write a for loop but it would break if we add another type, same if I allocate an array
@@ -72,12 +72,12 @@ namespace cmd {
 	 */
 	[[ nodiscard ]] outputType to_value(std::string value, Type t) noexcept(false){
 		if(value == "\0")
-			throw std::runtime_error("Empty strings are NOT allowed in `to_value()`");
+			throw std::invalid_argument("Empty strings are NOT allowed in `to_value()`");
 
 		outputType res;
 		switch (t) {
 			case Type::argument:
-				throw std::logic_error("Trying to cast a token to the argument type.");
+				throw std::logic_error("Cannot cast a token to the argument type.");
 
 			case Type::boolean:
 				if(!Parser::isCorrectValue(value, Type::boolean))
@@ -104,7 +104,7 @@ namespace cmd {
 				break;
 
 			default:
-				throw notImplemented("A new type is not implemented but used in `cmd::to_value()`.");
+				throw notImplemented("A new type is not implemented in `cmd::to_value()`.");
 		}
 
 		return res;
@@ -151,11 +151,12 @@ namespace cmd {
 	 * @param guess If the function should try to guess the type of unknown arguments, if set to false will throw an error in this situation.
 	 */
 	[[ nodiscard ]] Parser::parseReturn_t Parser::parse(int argc, const char* argv[]) noexcept(false){
-		Parser::parseReturn_t res;
+		if(argc < 1 || (argc == 1 && !parse0))		//if argv has a length of 0
+			return {};
 
 		Type expected(Type::argument);
-		if(!parse0 && argc <= 1)
-			throw std::overflow_error("The member `Parser.parse0` = "+ std::to_string(parse0) +" creates an overflow (try to set it to true).");
+		Parser::parseReturn_t res;
+
 		for(int i = !parse0; i < argc; i++) {
 			if(!argv[i] || (!argv[i+1] && i+1 < argc))
 				throw std::logic_error("The parameter `argc` ("+ std::to_string(argc) +") is greater than the real size of `argv` (either "+ std::to_string(i) +" or "+ std::to_string(i+1) +")");
@@ -169,11 +170,9 @@ namespace cmd {
 				throw std::invalid_argument("Empty strings are not allowed as arguments.");
 
 			if(!isCorrectName(currentToken) && !isCorrectValue(currentToken, expected))
-				throw parse_error("The `"+ std::string(currentToken) +"` token is not an argument name nor a value of type " + to_string(expected) + ".");
+				throw unknownArgument_error("The `"+ std::string(currentToken) +"` token is not an argument name nor a value of type " + to_string(expected) + ".", currentToken);
 
 			if(expected != Type::argument){
-				if(previousToken == "\0")
-					throw parse_error("You specified a value.");
 				res[previousToken] = to_value(currentToken, knownArguments[previousToken]);	//assigning values
 
 				expected = Type::argument;
@@ -187,7 +186,7 @@ namespace cmd {
 					const char arg[3] = {'-', currentToken[j], '\0'};
 
 					if(!argumentGuess && !isName(arg))
-						throw parse_error("An unknown argument ("+ std::string(arg) +") was found during the splitting of argument at index "+ std::to_string(i) +" ("+ currentToken +").");
+						throw unknownArgument_error("An unknown argument ("+ std::string(arg) +") was found during the splitting of argument at index "+ std::to_string(i) +" ("+ currentToken +").", arg);
 					res[arg] = true;
 				}
 				expected = Type::argument;
@@ -196,7 +195,7 @@ namespace cmd {
 
 			if(!isName(currentToken)){
 				if (!argumentGuess)
-					throw parse_error("Expected a defined argument name since the `guess` member is false for `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.");
+					throw unknownArgument_error("Expected a defined argument name since the `guess` member is false for `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.", currentToken);
 
 				if(isCorrectName(nextToken) || i+1 >= argc){
 					//implied  expected = Type::argument;
@@ -326,13 +325,25 @@ namespace cmd {
 
 
 
-	[[ nodiscard ]] Parser::parse_error::parse_error(const char str[])
-		: runtime_error(str)
+	[[ nodiscard ]] Parser::parse_error::parse_error(const char cstr[])
+		: runtime_error(cstr)
 	{}
 
 	[[ nodiscard ]] Parser::parse_error::parse_error(const std::string& str)
 		: runtime_error(str)
 	{}
+
+	[[ nodiscard ]] Parser::unknownArgument_error::unknownArgument_error(const char cstr[], const char arg[])
+		: parse_error(cstr), argName(arg)
+	{}
+
+	[[ nodiscard ]] Parser::unknownArgument_error::unknownArgument_error(const std::string& str, const std::string& arg)
+		: parse_error(str), argName(arg)
+	{}
+
+	[[ nodiscard ]] const std::string& Parser::unknownArgument_error::getArgName(void) const {
+		return argName;
+	}
 
 	/**
 	 * Try to guess what type could be `value` (assumes it is a value), if it does not fit any type, return `Type::argument`.

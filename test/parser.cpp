@@ -202,5 +202,15 @@ int main(void){
 	assert(std::get<bool>(res["--true"])			== false);
 	assert(std::get<bool>(res["--false"])			== false);
 
+	std::cout << COLOR_FG_BYELLOW << "Testing empty arrays\n" << COLOR_FG_RESET;
+	constexpr int emptyLength = 0;
+	const char* emptyArray[emptyLength + 2] = {"--not-an", "--argument"};
+	res = run(emptyLength, emptyArray);
+
+	const Parser::parseReturn_t emptyExpected = {};		//the expected result of parse()
+
+	assert(res == emptyExpected);
+
+
 	std::cout << COLOR_FG_GREEN << "Success!" << COLOR_FG_RESET << std::endl;
 }
