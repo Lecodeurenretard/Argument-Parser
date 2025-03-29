@@ -1,6 +1,6 @@
 #include <variant>
 #include <algorithm>
-#include <nlibs/Util>
+#include "Util.hpp"
 
 namespace cmd {
 	/** Types of arguments */

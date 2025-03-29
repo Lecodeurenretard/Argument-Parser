@@ -13,13 +13,14 @@ installShared() {
 }
 
 areFilesThere(){
-	return $(! [[ ! -f "Parser.hpp" || ! -f "Util.hpp" || ! -f "libArgumentParser.so" || ! -f "libUtil.so" ]])
+	return $([[ -f "Parser.hpp" &&  -f "Util.hpp" &&  -f "libArgumentParser.so" && -f "libUtil.so" ]])
 }
 
 if ! areFilesThere; then
 	cd ..
 	if ! areFilesThere; then
-		echo "Cannot find Parser.hpp and Util.hpp in the same folder, try to move in the directory they are." 1>&2
+		echo "Cannot find Parser.hpp and Util.hpp and corresponding .so in the same folder, try to move in the directory they are." 1>&2
+		echo "Try to run compileLibs first." 1>&2
 		exit 1
 	fi
 fi
@@ -35,7 +36,7 @@ verifyLibInstalled "libUtil\.so"
 
 echo -e "\\nCopying Parser.hpp..."
 sudo cp Parser.hpp	/usr/include/c++/nlibs/Parser		&& echo "Successfully copied the headers!"
-sudo cp Util.hpp		/usr/include/c++/nlibs/Util		&& echo "Successfully copied the headers!"
+sudo cp Util.hpp	/usr/include/c++/nlibs/Util		&& echo "Successfully copied the headers!"
 	
 # if nlibs is a file but not a symlink, it will print an error
 ! [ -L /usr/include/nlibs ] && sudo ln -s /usr/include/c++/nlibs /usr/include/nlibs
