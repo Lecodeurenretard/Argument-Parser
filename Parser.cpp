@@ -1,6 +1,10 @@
-#include <nlibs/Parser>
 #include <iostream>
-using namespace util;
+
+#if __has_include("Parser.hpp")
+	#include "Parser.hpp"
+#else
+	#include <nlibs/Parser>
+#endif
 
 namespace cmd {
 	/**
@@ -24,7 +28,7 @@ namespace cmd {
 				return "string";
 
 			default:
-				throw notImplemented("A new type is not implemented but used in `cmd::to_string(Type)`.");
+				{}//throw util::notImplemented("A new type is not implemented but used in `cmd::to_string(Type)`.");
 		}
 	}
 
@@ -104,7 +108,7 @@ namespace cmd {
 				break;
 
 			default:
-				throw notImplemented("A new type is not implemented in `cmd::to_value()`.");
+				{}//throw util::notImplemented("A new type is not implemented in `cmd::to_value()`.");
 		}
 
 		return res;
@@ -319,7 +323,7 @@ namespace cmd {
 			return false;	// If this method is used, that's a bug. This makes more easy to track it down
 
 		default:
-			throw util::notImplemented("A new type is not implemented but used in `cmd::Parser::isCorrectValue()`.");
+			{}//throw util::notImplemented("A new type is not implemented but used in `cmd::Parser::isCorrectValue()`.");
 		}
 	}
 

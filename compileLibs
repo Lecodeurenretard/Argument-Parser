@@ -46,8 +46,11 @@ exitCode=$?
 if [[ $exitCode = 0 && "$1" = "--install" ]]; then
 	cp ../Util.hpp		Util.hpp	# Copies the headers into temporary files for the install script
 	cp ../Parser.hpp	Parser.hpp
-	[[ -f installLibs ]]	&&  ./installLibs
-	[[ -f ../installLibs ]]	&& ../installLibs		# If the file doesn't exists, checks the parent directory
+	cp ../installLibs	installLibs
+	
+	! [[ -f installLibs ]] && echo "./installLib script not found." 1>&2 && rm Util.hpp Parser.hpp && exit 1
+	
+	./installLibs
 
 	rm Util.hpp Parser.hpp
 fi

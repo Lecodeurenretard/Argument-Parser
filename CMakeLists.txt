@@ -1,27 +1,24 @@
 cmake_minimum_required(VERSION 3.6) 
-project("Agument parser" VERSION 0.1 LANGUAGES CXX)
+project("Argument parser" VERSION 1.0 LANGUAGES CXX)
 
 if(NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
 	set(CMAKE_BUILD_TYPE "Release")
 else()
-	# add_compile_options(-g)
+	add_compile_options(-g)
 endif()
 message("Build type used: ${CMAKE_BUILD_TYPE}")
 
-add_compile_options(-Wall -std=gnu++23 -fno-stack-protector)
+add_compile_options(-Wall -std=gnu++23)
 
-SET(
+set(
 	LIB_UTIL
 	"Util.cpp"
 )
 
-SET(
+set(
 	LIB_PARSER
 	"Parser.cpp"
 )
 
 add_library(Util			SHARED ${LIB_UTIL})
 add_library(ArgumentParser	SHARED ${LIB_PARSER})
-
-target_include_directories(Util PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(ArgumentParser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
