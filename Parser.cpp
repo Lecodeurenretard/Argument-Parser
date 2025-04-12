@@ -28,7 +28,8 @@ namespace cmd {
 				return "string";
 
 			default:
-				{}//throw util::notImplemented("A new type is not implemented but used in `cmd::to_string(Type)`.");
+				throw std::logic_error("A new type is not implemented in `to_string(Type)` but passed to the method.");
+				//util::notImplemented("A new type is not implemented but used in `cmd::to_string(Type)`.");
 		}
 	}
 
@@ -108,7 +109,8 @@ namespace cmd {
 				break;
 
 			default:
-				{}//throw util::notImplemented("A new type is not implemented in `cmd::to_value()`.");
+				throw std::logic_error("A new type is not implemented in `cmd::to_value()`.");
+				//throw util::notImplemented("A new type is not implemented in `cmd::to_value()`.");
 		}
 
 		return res;
@@ -323,7 +325,8 @@ namespace cmd {
 			return false;	// If this method is used, that's a bug. This makes more easy to track it down
 
 		default:
-			{}//throw util::notImplemented("A new type is not implemented but used in `cmd::Parser::isCorrectValue()`.");
+			throw std::logic_error("A new type is not implemented in `cmd::Parser::isCorrectValue()` but passed to the method.");
+			//throw util::notImplemented("A new type is not implemented but used in `cmd::Parser::isCorrectValue()`.");
 		}
 	}
 

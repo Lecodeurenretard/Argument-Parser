@@ -4,6 +4,7 @@
 	#include <nlibs/Util>
 #endif
 
+//That's it, I'm giving up on including this class
 namespace util {
 	notImplemented::notImplemented(const char cstr[])
 		: std::runtime_error(cstr)

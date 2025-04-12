@@ -1,0 +1,21 @@
+#!/bin/bash
+isWSL() {
+	return [[ -f "/proc/sys/fs/binfmt_misc/WSLInterop" ]]
+}
+
+
+[[ -d release ]] && rm -r release
+
+mkdir release
+cd release
+
+cmake .. && cmake --build . && rm -r CMakeFiles *.cmake CMakeCache.txt Makefile
+[[ $? = 0 ]] && cp ../Parser.hpp Parser.hpp && cp ../Util.hpp Util.hpp && cp ../installLibs installLibs && cp ../compileExe compileExe && cp ../compileLibs compileLibs
+[[ $? = 0 ]] && cd .. && zip -r release.zip release
+rm -r release
+
+if isWSL; then
+	explorer.exe .	# Launch the file explorer
+else
+	nemo .			# Ubuntu's file explorer
+fi

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6) 
-project("Argument parser" VERSION 1.0 LANGUAGES CXX)
+project("Argument parser" VERSION 1.2 LANGUAGES CXX)
 
 if(NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
 	set(CMAKE_BUILD_TYPE "Release")
