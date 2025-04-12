@@ -185,8 +185,7 @@ namespace cmd {
 				continue;
 			}
 
-			const bool isCurrentCombinedName(isCombinedName(currentToken));
-			if(isCurrentCombinedName){
+			if(isCombinedName(currentToken)){
 				//separate all names
 				for(size_t j = 1; j < currentToken.size(); j++){
 					const char arg[3] = {'-', currentToken[j], '\0'};
@@ -204,7 +203,7 @@ namespace cmd {
 					throw unknownArgument_error("Expected a defined argument name since the `guess` member is false for `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.", currentToken);
 
 				if(isCorrectName(nextToken) || i+1 >= argc){
-					//implied  expected = Type::argument;
+					//implied  `expected = Type::argument;`
 					knownArguments[currentToken] = Type::boolean;
 					res[currentToken] = true;
 					continue;
@@ -219,7 +218,9 @@ namespace cmd {
 			}
 
 			//else `currentToken` is the name of an argument
-			if(std::find(knownBoolArguments.begin(), knownBoolArguments.end(), currentToken) != knownBoolArguments.end() && isCorrectName(nextToken)) {	//if the argument is a boolean
+			
+			//checking if the argument is a boolean
+			if((nextToken == "\0" || isCorrectName(nextToken)) && util::vecContain(knownBoolArguments, currentToken)) {
 				res[currentToken] = true;
 				expected = Type::argument;
 				continue;
@@ -227,6 +228,7 @@ namespace cmd {
 
 			expected = knownArguments[currentToken];
 		}
+		//set all boolean left to false
 		for(auto boolArg : knownBoolArguments)
 			if(!res.contains(boolArg))
 				res[boolArg] = false;

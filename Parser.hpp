@@ -93,3 +93,13 @@ namespace std {
 	bool isdigit(char);
 	bool isspace(char);
 }
+
+namespace util {
+	/**
+	 * Check if `vec` contains `toSearch`.
+	 */
+	template<typename T>
+	bool vecContain(std::vector<T> vec, T toSearch){
+		return std::find(vec.begin(), vec.end(), toSearch) != vec.end();
+	}
+}
