@@ -32,7 +32,7 @@ int main(int argc, const char* argv[]){
 			{"--false"	, Type::boolean},
 			{"--bool"	, Type::boolean},
 			{"--string"	, Type::string},
-			{"-u"	, Type::integer},
+			{"-u"	, Type::unsignedInteger},
 			{"-i"	, Type::integer},
 			{"-f"	, Type::decimal},
 			{"-d"	, Type::decimal},

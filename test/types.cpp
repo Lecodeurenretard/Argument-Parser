@@ -42,6 +42,15 @@ int main(int argc, char* argv[]){
 	assert(cmd::Parser::isCorrectValue("definitly not true"	, cmd::Type::boolean)		== false);
 	assert(cmd::Parser::isCorrectValue("falsetrue"	, cmd::Type::boolean)				== false);
 
+	std::cout << COLOR_FG_BYELLOW << "Checking `cmd::Parser::isCorrectValues(*, cmd::Type::unsignedInteger)`...\n" << COLOR_FG_RESET;
+	assert(cmd::Parser::isCorrectValue("1234"	, cmd::Type::unsignedInteger)					== true);
+	assert(cmd::Parser::isCorrectValue("+1234"	, cmd::Type::unsignedInteger)					== false);
+	assert(cmd::Parser::isCorrectValue("-1234"	, cmd::Type::unsignedInteger)					== false);
+	assert(cmd::Parser::isCorrectValue("\0"		, cmd::Type::unsignedInteger)					== false);
+	assert(cmd::Parser::isCorrectValue("string"	, cmd::Type::unsignedInteger)					== false);
+	assert(cmd::Parser::isCorrectValue("1.23"	, cmd::Type::unsignedInteger)					== false);
+	assert(cmd::Parser::isCorrectValue("~12334"	, cmd::Type::unsignedInteger)					== false);
+
 	std::cout << COLOR_FG_BYELLOW << "Checking `cmd::Parser::isCorrectValues(*, cmd::Type::integer)`...\n" << COLOR_FG_RESET;
 	assert(cmd::Parser::isCorrectValue("1234"	, cmd::Type::integer)					== true);
 	assert(cmd::Parser::isCorrectValue("+1234"	, cmd::Type::integer)					== true);
@@ -49,10 +58,10 @@ int main(int argc, char* argv[]){
 	assert(cmd::Parser::isCorrectValue("\0"		, cmd::Type::integer)					== false);
 	assert(cmd::Parser::isCorrectValue("+"		, cmd::Type::integer)					== false);
 	assert(cmd::Parser::isCorrectValue("-"		, cmd::Type::integer)					== false);
-	assert(cmd::Parser::isCorrectValue("+ "		, cmd::Type::integer)					== false);
-	assert(cmd::Parser::isCorrectValue("- "		, cmd::Type::integer)					== false);
 	assert(cmd::Parser::isCorrectValue("string"	, cmd::Type::integer)					== false);
 	assert(cmd::Parser::isCorrectValue("1.23"	, cmd::Type::integer)					== false);
+	assert(cmd::Parser::isCorrectValue("+1.23"	, cmd::Type::integer)					== false);
+	assert(cmd::Parser::isCorrectValue("-1.23"	, cmd::Type::integer)					== false);
 	assert(cmd::Parser::isCorrectValue("~12334"	, cmd::Type::integer)					== false);
 
 	std::cout << COLOR_FG_BYELLOW << "Checking `cmd::Parser::isCorrectValues(*, cmd::Type::decimal)`...\n" << COLOR_FG_RESET;
@@ -87,11 +96,12 @@ int main(int argc, char* argv[]){
 
 
 	std::cout << COLOR_FG_BYELLOW << "Checking `cmd::to_string(cmd::Type)`...\n" << COLOR_FG_RESET;
-	assert(cmd::to_string(cmd::Type::argument)	== "argument"	);
-	assert(cmd::to_string(cmd::Type::boolean)	== "boolean"	);
-	assert(cmd::to_string(cmd::Type::integer)	== "integer"	);
-	assert(cmd::to_string(cmd::Type::decimal)	== "decimal"	);
-	assert(cmd::to_string(cmd::Type::string)	== "string"		);
+	assert(cmd::to_string(cmd::Type::argument)			== "argument"	);
+	assert(cmd::to_string(cmd::Type::boolean)			== "boolean"	);
+	assert(cmd::to_string(cmd::Type::unsignedInteger)	== "unsigned integer"	);
+	assert(cmd::to_string(cmd::Type::integer)			== "integer"	);
+	assert(cmd::to_string(cmd::Type::decimal)			== "decimal"	);
+	assert(cmd::to_string(cmd::Type::string)			== "string"		);
 	
 	std::cout << COLOR_FG_YELLOW << "NOT checking `guessType()` because it is private\n" << COLOR_FG_RESET;
 	/*assert(cmd::Parser::guessType("\0")			== cmd::Type::argument);

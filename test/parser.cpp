@@ -47,7 +47,7 @@ Parser::argList_t parserList = {
 	{"--false"	, Type::boolean},
 	{"--true"	, Type::boolean},
 
-	{"-u"		, Type::integer},
+	{"-u"		, Type::unsignedInteger},
 	{"-i"		, Type::integer},
 
 	{"-f"		, Type::decimal},
@@ -101,7 +101,7 @@ int main(void){
 	assert(std::get<bool>(res["--false"])		== false);
 	
 	std::cout << COLOR_FG_BYELLOW << "Testing ints\n"			<< COLOR_FG_RESET;
-	assert(std::get<int>(res["-u"])				==  123456789);
+	assert(std::get<uint>(res["-u"])			==  123456789);
 	assert(std::get<int>(res["-i"])				== -123456789);
 	
 	std::cout << COLOR_FG_BYELLOW << "Testing floats\n"			<< COLOR_FG_RESET;
@@ -134,10 +134,11 @@ int main(void){
 
 
 	std::cout << COLOR_FG_BYELLOW << "Testing argument guessing\n" << COLOR_FG_RESET;
-	constexpr int guessLength = 11;
+	constexpr int guessLength = 13;
 	const char* guessArray[guessLength] = {
 		"--ustr"	, "Hello!"	,
-		"--uint"	, "1234"	,
+		"--uuint"	, "1234"	,
+		"--uint"	, "-1234"	,
 		"--ufloat"	, ".567"	,
 		"--ubool"	,
 		"--ufalse"	, "false"	,
@@ -149,14 +150,16 @@ int main(void){
 	//checking types
 	assert(std::holds_alternative<std::string>(	res["--ustr"]	)	== true);
 	assert(std::holds_alternative<int>(			res["--uint"]	)	== true);
+	assert(std::holds_alternative<uint>(		res["--uuint"]	)	== true);
 	assert(std::holds_alternative<float>(		res["--ufloat"]	)	== true);
 	assert(std::holds_alternative<bool>(		res["--ubool"]	)	== true);
 	assert(std::holds_alternative<bool>(		res["--ufalse"]	)	== true);
 	assert(std::holds_alternative<bool>(		res["--utrue"]	)	== true);
-	
+
 	//checking values
 	assert(std::get<std::string>(	res["--ustr"]	) == "Hello!"		);
-	assert(std::get<int>(			res["--uint"]	) == 1234			);
+	assert(std::get<uint>(			res["--uuint"]	) == 1234			);
+	assert(std::get<int>(			res["--uint"]	) == -1234			);
 	assert(std::get<float>(			res["--ufloat"]	) == (float)0.567	);
 	assert(std::get<bool>(			res["--ubool"]	) == true			);
 	assert(std::get<bool>(			res["--ufalse"]	) == false			);
@@ -187,7 +190,7 @@ int main(void){
 	constexpr int splitLength = 4;
 	const char* splitArray[splitLength] = {
 		"-bt"	,
-		"--int"	, "1234",
+		"--int"	, "+1234",
 		"-xya"
 	};
 

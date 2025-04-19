@@ -15,6 +15,7 @@ namespace cmd {
 		argument,		//should only be used internally & for errors
 		boolean,
 		integer,
+		unsignedInteger,
 		decimal,
 		string
 	};
@@ -24,6 +25,7 @@ namespace cmd {
 	typedef std::variant<
 		bool,
 		int,
+		uint,
 		float,
 		std::string
 	> outputType;

@@ -18,6 +18,9 @@ namespace cmd {
 			case Type::boolean:
 				return "boolean";
 
+			case Type::unsignedInteger:
+				return "unsigned integer";
+
 			case Type::integer:
 				return "integer";
 
@@ -59,7 +62,10 @@ namespace cmd {
 			res = to_bool(value);
 			return res;
 		}
-		if(Parser::isCorrectValue(value, Type::integer)){
+		if(Parser::isCorrectValue(value, Type::integer)){	//so is for `unsignedInterger`
+			if(value[0] != '-')
+				return (uint)std::atoi(value.c_str());
+			
 			res = std::atoi(value.c_str());
 			return res;
 		}
@@ -90,6 +96,12 @@ namespace cmd {
 				res = to_bool(value);
 				break;
 
+			case Type::unsignedInteger:
+				if(!Parser::isCorrectValue(value, Type::unsignedInteger))
+					throw std::invalid_argument("The parameter `value` ("+ value +") in `cmd::to_value()` can't be converted to an " + to_string(Type::unsignedInteger) + ".");
+				res = (uint)std::atoi(value.c_str());
+				break;
+			
 			case Type::integer:
 				if(!Parser::isCorrectValue(value, Type::integer))
 					throw std::invalid_argument("The parameter `value` ("+ value +") in `cmd::to_value()` can't be converted to an " + to_string(Type::integer) + ".");
@@ -203,7 +215,7 @@ namespace cmd {
 					throw unknownArgument_error("Expected a defined argument name since the `guess` member is false for `argv["+ std::to_string(i) +"]` but got `"+ currentToken +"`.", currentToken);
 
 				if(isCorrectName(nextToken) || i+1 >= argc){
-					//implied  `expected = Type::argument;`
+					//implied `expected = Type::argument;`
 					knownArguments[currentToken] = Type::boolean;
 					res[currentToken] = true;
 					continue;
@@ -271,6 +283,9 @@ namespace cmd {
 		switch (expectedType){
 		case Type::boolean: 
 			return str == "true" || str == "false";
+
+		case Type::unsignedInteger:
+			return isCorrectValue(str, Type::integer) && str[0] != '-' && str[0] != '+';
 
 		case Type::integer:{
 			//a number can't just be  a `+` or a `-`
@@ -365,6 +380,9 @@ namespace cmd {
 		if (Parser::isCorrectValue(value, Type::boolean))
 			return Type::boolean;
 
+		if (Parser::isCorrectValue(value, Type::unsignedInteger))
+			return Type::unsignedInteger;
+		
 		if (Parser::isCorrectValue(value, Type::integer))
 			return Type::integer;
 

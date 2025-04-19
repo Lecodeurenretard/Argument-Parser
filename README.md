@@ -94,7 +94,7 @@ Namely, all of those are correct names:
 + `-j`
 + `--j`
 + `--word`
-+ `--word-and-dash`
++ `--mime-and-dash`
 + `--`
 + `---`
 
@@ -102,13 +102,21 @@ Namely, all of those are correct names:
 The only correct boolean values are `true` and `false` (case-sensitive).
 
 ### Number syntax
-A number may begin by a `+` or `-` sign, else they are only digits except for one dot `.` for decimal numbers. If the first character is a dot `.`, it is implied that the whole part of the number is zero.  
+#### Unsigned integer syntax
+An unsigned integer have to contain only digit, sign `+` is not allowed.
+
+#### Signed integer syntax
+A signed integer can be negative so signs `+` and `-` are accepted.
+
+#### Decimal number syntax
+Follow the rules of the signed integer but can have a decimal part begining by a dot `.`. They can also not contain an integer part, in this case it is implied this part is 0.
+
 All of those are correct numbers:
-+ `1234`
-+ `+1234`
-+ `-1234`
-+ `1234.56`
-+ `-.1234`
++ `1234`  (unsigned)
++ `+1234` (signed)
++ `-1234` (signed)
++ `1234.56` (decimal)
++ `-.1234`  (decimal)
 
 ### String syntax
-All sequence of characters except those above the string size limit are correct strings. This does **not** include empty strings.
+All sequence of characters containing at least one non null characterand at most the string size limit are correct strings.

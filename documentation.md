@@ -9,6 +9,7 @@ This enumeration containg all types supported for parsing in the command line:
   
 	The first two are straightforward but the last one is a shorthand for `true` since the absence of a boolean parameter will set it to false.
 
++ **`unsignedInteger`**: A positive integer.
 + **`integer`**: A signed integer.
 + **`decimal`**: A floating point value.
 + **`string`**: A sequence of characters.
@@ -18,10 +19,11 @@ This enumeration containg all types supported for parsing in the command line:
 ## The `outputType` variant
 This variant provides corresponding types for the `Type` enum, it maps all types from `Type` to a C++ type.  
 Here are the links:
-+ `Type::boolean`	$\longleftrightarrow$	`bool`
-+ `Type::integer`	$\longleftrightarrow$	`int`
-+ `Type::float`		$\longleftrightarrow$	`float`
-+ `Type::string`	$\longleftrightarrow$	`std::string`
++ `Type::boolean`			$\longleftrightarrow$	`bool`
++ `Type::unsignedInteger`	$\longleftrightarrow$	`uint`
++ `Type::integer`			$\longleftrightarrow$	`int`
++ `Type::float`				$\longleftrightarrow$	`float`
++ `Type::string`			$\longleftrightarrow$	`std::string`
 + `Type::argument` don't have any corresponding type, the `to_value()` method will simply throw an error if you try to do it.
 
 ## Isolated functions
