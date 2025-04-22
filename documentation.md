@@ -1,8 +1,8 @@
 # Code documentation
 
 ## The `Type` enum
-This enumeration containg all types supported for parsing in the command line:
-+ **`boolean`**: A boolean attribute, can have 3 values:
+This enumeration contains all types supported for parsing in the command line:
++ **`boolean`**: A boolean argument, while parsing accepts 3 values:
 	- An explicit _`true`_ value,
 	- An explicit _`false`_ value,
 	- no value
@@ -14,16 +14,16 @@ This enumeration containg all types supported for parsing in the command line:
 + **`decimal`**: A floating point value.
 + **`string`**: A sequence of characters.
 
-+ **`argument`**: This type is only for internal purposes, it represents an argument.
++ **`argument`**: This type is only for internal purposes, it represents an argument and is an error value for Types.
 
 ## The `outputType` variant
-This variant provides corresponding types for the `Type` enum, it maps all types from `Type` to a C++ type.  
-Here are the links:
-+ `Type::boolean`			$\longleftrightarrow$	`bool`
+This variant provides corresponding types for the `Type` enum, it mirrors all types from `Type` to C++ types.  
+Here are the correspondances:
++ `Type::boolean`		$\longleftrightarrow$	`bool`
 + `Type::unsignedInteger`	$\longleftrightarrow$	`uint`
-+ `Type::integer`			$\longleftrightarrow$	`int`
-+ `Type::float`				$\longleftrightarrow$	`float`
-+ `Type::string`			$\longleftrightarrow$	`std::string`
++ `Type::integer`		$\longleftrightarrow$	`int`
++ `Type::float`			$\longleftrightarrow$	`float`
++ `Type::string`		$\longleftrightarrow$	`std::string`
 + `Type::argument` don't have any corresponding type, the `to_value()` method will simply throw an error if you try to do it.
 
 ## Isolated functions
