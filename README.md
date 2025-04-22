@@ -2,30 +2,60 @@
 ## Purpose
 This is a library for parsing argument passed with the command line.
 
-## Include
-### Build from source
-In order to include this library, you'll have to compile it from source (cmake and gcc required):
-```bash
-git clone "https://github.com/Lecodeurenretard/Argument-Parser.git"
-cd "Argument-Parser"
- 
-./compileLib --install	# Require sudo permission, remove the `--install` argument if you don't have them
+## Quick overview
+### Example
+```C++
+#include <nlibs/Parser>
+
+using namespace cmd;	//all functions of this library are in the `cmd` and `util` namespace
+int main(int argc, const char* argv[]) {
+	Parser parser(
+		{
+			{"-a", Type::bool},
+			{"-b", Type::string},
+			{"-c", Type::decimal},
+			{"--argument1", Type::unsignedInteger},
+			{"--argument2", Type::integer},
+		},
+	);
+	auto parsingResult = parser.parse(argc, argv);
+
+	if(std::get<bool>(parsingResult["-a"]))
+		std::cout << "`-a` value: true\n";
+	else
+		std::cout << "`-a` value: false\n";
+
+	if(parsingResult.contains("-b"))
+		std::cout << "`-b` value: " << std::get<std::string>(parsingResult["-b"]) << "\n";
+	if(parsingResult.contains("-c"))
+		std::cout << "`-c` value: " << std::get<float>(parsingResult["-c"]) << "\n";
+
+	if(parsingResult.contains("--argument1"))
+		std::cout << "`--argument1` value: " << std::to_string(std::get<uint>(parsingResult["--argument"])) << "\n";	//uint are not printed as ints
+	if(parsingResult.contains("--argument2"))
+		std::cout << "`--argument2` value: " << std::get<int>(parsingResult["--argument2"]) << "\n";
+}
 ```
 
-If you passed the `--install` parameter to `compileLib`, you can now include `<nlibs/Parser>` to use the `Parser` class. 
-If not, you'll have to include `Parser.hpp` from where you cloned the repo, to compile your project you can use `compileExe`.
+### Description of main methods
+Before parsing, the parser must be initialized, here's the constructor's signature:
+```C++
+using argList_t	= std::map <std::string, Type>;
+Parser::Parser(const argList_t& arguments = {}, bool parseZero = false, bool guess = false) noexcept(false);
+```
+The **`arguments`** parameter is a map associating a string with a `Type` an enum reprsenting the possible types of arguments (see the [documentation](documentation.md#the-type-enum)).  
+The **`parseZero`** parameter controls wether the first token should be parsed, on a command line context it should be off since `argv[0]` is the name of the executable.  
+The **`guess`** parameter controls wether the `parse()` method should try to guess unknown argument's type (argument name not in `arguments`). If off and encounters an unknown argument, throws a `cmd::Parser::unknownArgument_error`.
 
-### Use the compiler scripts
-There are two of them written in bash:
-+ **`compileLibs`**: Compiles the Argument Parser library in the `build` directory, if it already exists will prompt the user what does he want to do.  
-If the `--install` argument is passed and the user grants root permissions, will copy the compiled library and header in the `/usr/lib` and `/usr/include/c++/nlibs` folders.
-+ **`compileExe`**: Compiles an executable using the compiled dynamic library in the same folder. Pass in first argument first the file to compile and the `g++` args.
-+  **`installLibs`**: If you already have the shared libraries and the header, you can use it in order to install the library.
 
-## Documentation
-The `Parser`, the `Type` and the `handledType` are defined in the `cmd` namespace.  
-If you need a documentation to for each function, you can go to the [code documentation](documentation.md).
-
+Then the arguments may be parsed with the `parse()` method, here's its signature:
+```C++
+using parseReturn_t = std::map<std::string, outputType>;
+Parser::parseReturn_t Parser::parse(int argc, const char* argv[]) noexcept(false);
+```
+The `argc` parameter is the size of `argv[]` which is an array of non empty c-strings containing the command line input. I call an element of `argv[]` a _token_.  
+For a command line usage both arguments are the parameter of the `main()` function in the same order.  
+`outputTypedocumentation.md#the-outputtype-variant` is a map associating a variant contaning the result of the parsing (see the [`documentation`](documentation.md#the-outputtype-variant)).
 
 ## Features and parsing edge cases
 In order to present some features let's say you have a C++ file named _argParser.cpp_ compiling to the executable _argParser_. The `parser` variable is an instance of `Parser` and `res` the result of parsing arguments from the command line.
@@ -33,8 +63,6 @@ In order to present some features let's say you have a C++ file named _argParser
 <!--Positional arguments disabled-->
 
 ### Grouping one letter boolean arguments
-Even if you think that's pretty specific, it is useful.
-
 If _argParser.cpp_ contains this code:
 ```C++
 if(std::get<bool>(res["-a"]))
@@ -49,7 +77,7 @@ if(std::get<bool>(res["-c"]))
 
 and the user enters in the terminal:
 ```bash
-argParser -abc		# all messages will be printed
+argParser -abc		# all messagesunsignedInteger will be printed
 argParser -ac		# all messages but the second one will be printed
 ```
 
@@ -69,20 +97,20 @@ Now you know what each function does, you can learn how to use them. A typical u
 
 int main(int argc, const char* argv[]){
 	cmd::Parser parser({
-			{"--arg"		, cmd::Type::boolean},
+			{"--arg"	, cmd::Type::boolean},
 			{"--argument"	, cmd::Type::string},
 			//...
 	});
 	
 	auto userInput = parser.parse(argc, argv);
 
-	if(std::get<bool>(userInput["--argument1"])){	//testing if the argument was entered
+	if(userInput.contains("--argument2")){		//testing if the argument was entered
 		//do something
 	}
 
-	if(userInput.contains("--argument2")){	//same but --argument2 is not a boolean
+	if(std::get<bool>(userInput["--argument1"])){	//same but --argument2 is a boolean
 		//do something
-	}
+	}	
 }
 ```
 In the end you only need to know only the `Parser.parse()` method but I think it's interesting to know about the rest.
@@ -120,3 +148,30 @@ All of those are correct numbers:
 
 ### String syntax
 All sequence of characters containing at least one non null characterand at most the string size limit are correct strings.
+
+## Including the library
+### Building from source
+This step can be skipped by downloading releases.
+
+In order to include this library, you'll have to compile it from source (cmake and gcc required):
+```bash
+git clone "https://github.com/Lecodeurenretard/Argument-Parser.git"
+cd "Argument-Parser"
+ 
+./compileLib --install
+```
+
+If you passed the `--install` parameter to `compileLib`, you can now include `<nlibs/Parser>` to use the `Parser` class. 
+If not, you'll have to include `Parser.hpp` from where you cloned the repo. To compile a C++ file using Argument-Parser you can use `compileExe`.
+
+### Using the compiler scripts
+There are two of them plus an installer script written in bash:
++ **`compileLibs`**: Compiles the Argument Parser library in the `build` directory, if it already exists will prompt the user what does he want to do.  
+If the `--install` argument is passed and the user grants root permissions, will copy the compiled library in the `/usr/lib` folder and the header `/usr/include/c++/nlibs` directory.
++ **`compileExe`**: Compiles an executable using the compiled dynamic library in the same folder. Pass in first argument first the file to compile and the `g++` args.
++ **`installLibs`**: If you already have the shared libraries and the header, you can use it in order to install the library.
+
+## Documentation
+The `Parser`, the `Type` and the `handledType` are defined in the `cmd` namespace.  
+If you need a documentation to for each function, you can go to the [code documentation](documentation.md).
+
