@@ -11,7 +11,7 @@ using namespace cmd;	//all functions of this library are in the `cmd` and `util`
 int main(int argc, const char* argv[]) {
 	Parser parser(
 		{
-			{"-a", Type::bool},
+			{"-a", Type::boolean},
 			{"-b", Type::string},
 			{"-c", Type::decimal},
 			{"--argument1", Type::unsignedInteger},
