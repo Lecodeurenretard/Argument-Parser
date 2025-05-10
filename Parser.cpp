@@ -169,11 +169,14 @@ namespace cmd {
 	 * @param guess If the function should try to guess the type of unknown arguments, if set to false will throw an error in this situation.
 	 */
 	[[ nodiscard ]] Parser::parseReturn_t Parser::parse(int argc, const char* argv[]) noexcept(false){
-		if(argc < 1 || (argc == 1 && !parse0))		//if argv has a length of 0
-			return {};
+		Parser::parseReturn_t res;
+		if(argc < 1 || (argc == 1 && !parse0)) {		//if argv has a length of 0
+			for(auto boolArg : knownBoolArguments)
+				res[boolArg] = false;
+			return res;
+		}
 
 		Type expected(Type::argument);
-		Parser::parseReturn_t res;
 
 		for(int i = !parse0; i < argc; i++) {
 			if(!argv[i] || (!argv[i+1] && i+1 < argc))
