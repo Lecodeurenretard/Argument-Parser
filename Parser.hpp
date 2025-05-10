@@ -1,6 +1,7 @@
 #include <variant>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #if __has_include(<nlibs/Util>)
 	#include <nlibs/Util>
